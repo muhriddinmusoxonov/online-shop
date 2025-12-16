@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '../user/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
+import { redis } from 'src/common/providers/redis.provider';
 
 @Injectable()
 export class AuthService {
@@ -42,5 +43,22 @@ export class AuthService {
       },
     );
     return token;
+  }
+
+  async saveResetCode(
+    userId: string,
+    token: string,
+    code: string,
+  ): Promise<string> {
+    await redis.set(`reset:${token}`, JSON.stringify({ code, userId }), {
+      EX: 60,
+    });
+
+    return 'success';
+  }
+
+  async getResetCode(token: string) {
+    const data = await redis.get(`reset:${token}`);
+    return data ? JSON.parse(data.toString()) : null;
   }
 }

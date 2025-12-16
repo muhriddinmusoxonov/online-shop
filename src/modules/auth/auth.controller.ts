@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { UserService } from '../user/user.service';
@@ -10,10 +10,12 @@ import { ResData } from 'src/lib/resData';
 import { User } from '../user/schema/user.schema';
 import { LoginDto } from './dto/login.dto';
 import { LoginOrPasswordIsWrong } from './authExceptionErrors/authExceptionsError';
+import { MailService } from './send-mail.service';
 import { SendCodeDto } from './dto/send.code.dto';
 import { generateCode } from 'src/lib/generateCode';
-import { MailService } from './send-mail.service';
 import { redis } from 'src/common/providers/redis.provider';
+import { CheckCodeDto } from './dto/check.code.dto';
+import { ResetCodeGuard } from 'src/Guards/reset-code.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -60,9 +62,11 @@ export class AuthController {
     return new ResData<User>(200, 'success', user, { token: token });
   }
 
+  //. -------------------------> ForGot Password <----------------------------------\\
+  //'forgot-password'
   @Post('forgot-password')
-  async sendCode(@Body() sendCode: SendCodeDto) {
-    const user = await this.userService.findByEmail(sendCode.email);
+  async sendCodeToEmail(@Body() sendCodeDto: SendCodeDto) {
+    const user = await this.userService.findByEmail(sendCodeDto.email);
     if (user === null) throw new UserIsNotFound();
 
     const code = await generateCode();
@@ -71,16 +75,33 @@ export class AuthController {
       String(user._id),
     );
 
-    await redis.set(
-      `email:${sendCode.email}`,
-      JSON.stringify({ code, token }),
-      { EX: 60 },
-    );
+    await this.authService.saveResetCode(String(user._id), token, code);
 
-    const data = await redis.get(`email:${sendCode.email}`);
-
-    console.log(data);
-
-    return new ResData<string>(200, 'success', String(user._id));
+    return new ResData<string>(200, 'success', token);
   }
+
+  //'check-code'
+  @Post('check-code')
+  @UseGuards(ResetCodeGuard)
+  async checkCode(@Body() checkCode: CheckCodeDto, @Req() req) {
+    // 2.user_id orqali user borligi tekshiriladi.
+    const id = req['userId'];
+
+    const user = await this.userService.findOneById(id);
+
+    return new ResData<User>(200, 'success', user);
+  }
+  // 3.user bo'lmasa error qaytariladi.
+  // 4.redis dan chaqirib code tekshiriladi.
+  // 5.code expired bo'lsa yoki xato bo'lsa error qaytariladi.
+  // 6.to'g'ri bo'lsa success qaytariladi.
+
+  // 'reset-password'
+  // 1.tokendan kelgan user_id orqali user bor yoki yo'qligi tekshiriladi.
+  // 2.agar topilmasa error qaytariladi.
+  // 3.body orqli qabul qilingan newPassword va confirmPassword tekshiriladi.
+  // 4.agar xato bo'lsa error qaytariladi.
+  // 5.keyin user ni newPasswordi hashlanadi.
+  // 6.user ni passwordi update qilib qo'yiladi.
+  // 7.ResData da success qaytariladi.
 }
