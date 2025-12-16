@@ -77,6 +77,12 @@ export class AuthController {
 
     await this.authService.saveResetCode(String(user._id), token, code);
 
+    await this.mailService.sendMail({
+      to: user.email,
+      subject: 'Password Reset Code',
+      text: `Your reset password code: ${code}`,
+    });
+
     return new ResData<string>(200, 'success', token);
   }
 
@@ -84,10 +90,10 @@ export class AuthController {
   @Post('check-code')
   @UseGuards(ResetCodeGuard)
   async checkCode(@Body() checkCode: CheckCodeDto, @Req() req) {
-    // 2.user_id orqali user borligi tekshiriladi.
     const id = req['userId'];
 
     const user = await this.userService.findOneById(id);
+    if (user === null) throw new UserIsNotFound();
 
     return new ResData<User>(200, 'success', user);
   }

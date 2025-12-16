@@ -13,17 +13,16 @@ export class ResetCodeGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const authHeader = request.headers['authorization'] as string; // 'Bearer <token>'
+    const authHeader = request.headers['authorization'] as string;
     const token =
       authHeader && authHeader.startsWith('Bearer ')
-        ? authHeader.split(' ')[1] // 'Bearer ' dan keyingi qismi token bo'ladi
+        ? authHeader.split(' ')[1]
         : null;
 
     if (!token) {
       throw new UnauthorizedException('Reset token required');
     }
 
-    // Redisdan user._id ni olish
     const user = await redis.get(`reset:${token}`);
 
     if (!user) {
@@ -32,9 +31,8 @@ export class ResetCodeGuard implements CanActivate {
 
     const userId = JSON.parse(user.toString());
 
-    // Foydalanuvchi ID sini request ga qo‘shib yuborish
     request['userId'] = userId.userId;
 
-    return true; // Guard muvaffaqiyatli bo‘ldi
+    return true;
   }
 }
