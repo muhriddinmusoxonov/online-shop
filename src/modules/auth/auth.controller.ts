@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Headers,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { UserService } from '../user/user.service';
@@ -9,13 +16,17 @@ import {
 import { ResData } from 'src/lib/resData';
 import { User } from '../user/schema/user.schema';
 import { LoginDto } from './dto/login.dto';
-import { LoginOrPasswordIsWrong } from './authExceptionErrors/authExceptionsError';
+import {
+  CodeIsWrong,
+  LoginOrPasswordIsWrong,
+} from './authExceptionErrors/authExceptionsError';
 import { MailService } from './send-mail.service';
 import { SendCodeDto } from './dto/send.code.dto';
 import { generateCode } from 'src/lib/generateCode';
 import { redis } from 'src/common/providers/redis.provider';
 import { CheckCodeDto } from './dto/check.code.dto';
 import { ResetCodeGuard } from 'src/Guards/reset-code.guard';
+import { ResetCode } from './dto/reset.code.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -62,7 +73,7 @@ export class AuthController {
     return new ResData<User>(200, 'success', user, { token: token });
   }
 
-  //. -------------------------> ForGot Password <----------------------------------\\
+  //. -------------------------> Forgot Password <----------------------------------\\
   //'forgot-password'
   @Post('forgot-password')
   async sendCodeToEmail(@Body() sendCodeDto: SendCodeDto) {
@@ -83,31 +94,50 @@ export class AuthController {
       text: `Your reset password code: ${code}`,
     });
 
-    return new ResData<string>(200, 'success', token);
+    return new ResData<null>(200, 'success', null, { token });
   }
 
   //'check-code'
   @Post('check-code')
   @UseGuards(ResetCodeGuard)
-  async checkCode(@Body() checkCode: CheckCodeDto, @Req() req) {
+  async checkCode(
+    @Body() checkCode: CheckCodeDto,
+    @Req() req,
+    @Headers('reset-token') token: string,
+  ) {
     const id = req['userId'];
 
     const user = await this.userService.findOneById(id);
     if (user === null) throw new UserIsNotFound();
 
-    return new ResData<User>(200, 'success', user);
+    const userRedis = await redis.get(`reset:${token}`);
+    const code = JSON.parse(userRedis.toString()).code;
+
+    if (Number(code) !== checkCode.code) throw new CodeIsWrong();
+
+    const resetToken = await this.authService.generateResetCodeToken(id);
+
+    const codeRedis = '1234';
+    await this.authService.saveResetCode(id, resetToken, codeRedis);
+
+    return new ResData<null>(200, 'success', null, { token: resetToken });
   }
-  // 3.user bo'lmasa error qaytariladi.
-  // 4.redis dan chaqirib code tekshiriladi.
-  // 5.code expired bo'lsa yoki xato bo'lsa error qaytariladi.
-  // 6.to'g'ri bo'lsa success qaytariladi.
 
   // 'reset-password'
-  // 1.tokendan kelgan user_id orqali user bor yoki yo'qligi tekshiriladi.
-  // 2.agar topilmasa error qaytariladi.
-  // 3.body orqli qabul qilingan newPassword va confirmPassword tekshiriladi.
-  // 4.agar xato bo'lsa error qaytariladi.
-  // 5.keyin user ni newPasswordi hashlanadi.
-  // 6.user ni passwordi update qilib qo'yiladi.
-  // 7.ResData da success qaytariladi.
+  @Post('reset-code')
+  @UseGuards(ResetCodeGuard)
+  async resetCode(@Body() resetCode: ResetCode, @Req() req) {
+    const id = req['userId'];
+
+    const user = await this.userService.findOneById(id);
+    if (user === null) throw new UserIsNotFound();
+
+    const hashPassword = await this.authService.hashPassword(resetCode.code);
+
+    const newUser = await this.userService.update(id, {
+      password: hashPassword,
+    });
+
+    return new ResData<User>(200, 'success', newUser);
+  }
 }

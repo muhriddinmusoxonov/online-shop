@@ -39,7 +39,7 @@ export class AuthService {
       { _id: id },
       {
         secret: process.env.FORGOTP_SECRET,
-        expiresIn: '15m',
+        expiresIn: '600',
       },
     );
     return token;
