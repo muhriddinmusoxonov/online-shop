@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Category } from 'src/modules/category/schema/category.schema';
+import { User } from 'src/modules/user/schema/user.schema';
 
 @Schema({ timestamps: true })
 export class Product extends Document {
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({ required: true, type: String, unique: false })
   name: string;
 
   @Prop()
@@ -22,6 +23,13 @@ export class Product extends Document {
     required: true,
   })
   category_id: Types.ObjectId;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: User.name,
+    required: true,
+  })
+  user_id: Types.ObjectId;
 
   @Prop({ type: [String], default: [] })
   image_url: string;

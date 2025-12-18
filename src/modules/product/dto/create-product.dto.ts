@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUrl,
   MinLength,
 } from 'class-validator';
 
@@ -33,7 +34,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   category_id: string;
 
+  @IsMongoId()
+  @IsNotEmpty()
+  user_id: string;
+
   @IsArray()
   @IsNotEmpty()
+  @IsString({ each: true }) // har bir element string bo‘lsin
+  @IsUrl({}, { each: true }) // har biri haqiqiy URL bo‘lsin
   image_url: string[];
 }

@@ -11,69 +11,38 @@ import {
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import {
-  IsCategoryIdNotObjectId,
-  ProductCheckNameOrCategoryId,
-  ProductIsAlreadyExist,
-  ProductIsNotFound,
-} from './productExceptionErrors/product.exception.errors';
+import { ProductIsNotFound } from './productExceptionErrors/product.exception.errors';
 import { CategoryService } from '../category/category.service';
-import { isValidObjectId } from 'mongoose';
-import { CategoryIsNotFound } from '../category/categoryExceptionErrors/categoryExceptionError';
 import { ResData } from 'src/lib/resData';
 import { Product } from './schema/productSchema';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { UserService } from '../user/user.service';
+import { UserIsNotFound } from '../user/excpetionErrors/userExceptionErrors';
+import { CategoryIsNotFound } from '../category/categoryExceptionErrors/categoryExceptionError';
 
 @Controller('product')
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
     private readonly categoryService: CategoryService,
+    private readonly userService: UserService,
   ) {}
 
   @Post('create')
   async create(@Body() createProductDto: CreateProductDto) {
-    const product = await this.productService.findByName(createProductDto.name);
-    if (product !== null) {
-      if (
-        product.price === createProductDto.price &&
-        String(product.category_id) === createProductDto.category_id
-      ) {
-        product.stock += createProductDto.stock;
-
-        const { _id, ...newData } = product.toObject();
-
-        const data = await this.productService.update(
-          String(product._id),
-          newData,
-        );
-
-        return new ResData<Product>(200, 'success', data);
-      } else if (
-        product.price !== createProductDto.price ||
-        String(product.category_id) !== createProductDto.category_id
-      ) {
-        throw new ProductCheckNameOrCategoryId();
-      }
-    }
-
-    if (!isValidObjectId(createProductDto.category_id)) {
-      throw new IsCategoryIdNotObjectId();
-    }
+    const user = await this.userService.findOneById(createProductDto.user_id);
+    if (user === null) throw new UserIsNotFound();
 
     const category = await this.categoryService.findOneId(
       createProductDto.category_id,
     );
     if (category === null) throw new CategoryIsNotFound();
 
-    if (!createProductDto.image_url.length) {
-      throw new HttpException('Image is required', 400);
-    }
-
     const data = await this.productService.create(createProductDto);
 
     return new ResData<Product>(201, 'created', data);
   }
+
   @Get()
   async findAll() {
     const data = await this.productService.findAll();
@@ -95,13 +64,6 @@ export class ProductController {
     @Body() updateProductDto: UpdateProductDto,
   ) {
     await this.findOne(id);
-
-    if (updateProductDto.name) {
-      const product = await this.productService.findByName(
-        updateProductDto.name,
-      );
-      if (product !== null) throw new ProductIsAlreadyExist();
-    }
 
     if (updateProductDto.image_url && updateProductDto.image_url !== null) {
       if (!updateProductDto.image_url.length) {
