@@ -1,7 +1,0 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateCode = generateCode;
-async function generateCode() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-//# sourceMappingURL=generateCode.js.map
