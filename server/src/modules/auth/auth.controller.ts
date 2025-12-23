@@ -154,3 +154,5 @@ export class AuthController {
 // 5. front check-code page iga o'tkazadi.
 // 6. GUARD orqali tokendan email olinadi va email orqali user topiladi va redisdagi userResetCode user jo'natgan kod bilan tekshiriladi.
 // 7. code to'g'ri bo'lsa mongoDb ga user create qilinadi.
+// 8. GURD yoziladi registerCheckCode uchun.
+// 9.saveResetCode() va getResetCode ham register ga moslab yoziladi.
