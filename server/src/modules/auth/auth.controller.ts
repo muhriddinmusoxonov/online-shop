@@ -27,6 +27,7 @@ import { redis } from 'src/common/providers/redis.provider';
 import { CheckCodeDto } from './dto/check.code.dto';
 import { ResetCodeGuard } from 'src/Guards/reset-code.guard';
 import { ResetCode } from './dto/reset.code.dto';
+import { RegisterVerifyGuard } from 'src/Guards/email-verify.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -36,27 +37,49 @@ export class AuthController {
     private readonly mailService: MailService,
   ) {}
 
-  @Post('register')
+  @Post('register-send-code')
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.userService.findByEmail(registerDto.email);
-
     if (user !== null) throw new UserIsAlreadyExist();
 
-    const byPhone = await this.userService.findByPhone(registerDto.phone);
-    if (byPhone !== null) throw new UserIsAlreadyExist();
+    const userByPhone = this.userService.findByPhone(registerDto.phone);
+    if (userByPhone !== null) throw new UserIsAlreadyExist();
 
     const password = await this.authService.hashPassword(registerDto.password);
 
     registerDto.password = password;
 
-    const registerEmailToken = await this.authService.generateResetCodeToken(registerDto.email);
+    const code = await generateCode();
+
+    const token = await this.authService.generateResetCodeToken(registerDto.email);
 
 
-    const userdata = await this.userService.create(registerDto);
+    await this.authService.saveRegisterResetCode(registerDto, token, code);
 
-    const token = await this.authService.generateToken(userdata);
 
-    return new ResData<User>(201, 'created', userdata, { token: token });
+      await this.mailService.sendMail({
+      to: registerDto.email,
+      subject: 'Password Reset Code',
+      text: `Your reset password code: ${code}`,
+    });
+
+    return new ResData<null>(200, 'success', null, { token });
+  }
+
+  @Post('register-check-code')
+  @UseGuards(RegisterVerifyGuard)
+  async checkRegisterCode(@Body() code: CheckCodeDto, @Req() req) {
+    const email = req['userEmail'];
+    const token = req['registerToken'];
+
+    const userData = await this.authService.getResetCode(token);
+
+    if (userData.code !== String(code.code)) throw new CodeIsWrong();
+
+
+    const newUser = await this.userService.create(userData.registerData);
+
+    return new ResData<User>(201, 'created', newUser);
   }
 
   @Post('login')
@@ -146,13 +169,17 @@ export class AuthController {
 }
 
 
-// Register bo'limiga send kod qo'shish:
-// 1. user create qilinishidan oldin emailga kod jo'natiladi.
-// 2. keyin code redisga saqlanadi.
-// 3. token email orqali yasaladi va redisga saqlanadi.
-// 4. shu yerda register data lari ham redisga saqlanadi.
-// 5. front check-code page iga o'tkazadi.
-// 6. GUARD orqali tokendan email olinadi va email orqali user topiladi va redisdagi userResetCode user jo'natgan kod bilan tekshiriladi.
-// 7. code to'g'ri bo'lsa mongoDb ga user create qilinadi.
-// 8. GURD yoziladi registerCheckCode uchun.
-// 9.saveResetCode() va getResetCode ham register ga moslab yoziladi.
+// manda yana bitta fikr tug'uldi.
+
+// Registerga sendEmailCode jo'natish uchun umumiy register ni bo'lib yuboramiz bir nechta qismga.
+// Birinchi qismda 'register-email-code'
+// 1️⃣dto dan kelgan emailga code jo'natadi
+// 2️⃣barcha register ma'lumotlarini redisga saqlanadi
+// get va set register uchun alohida yoziladi.
+// 3️⃣token yasaladi email orqli va u ham saqlanadi Redisga.
+
+// Ikkinchi qismda:
+// 1️⃣Guard yoziladi alohida.
+// 2️⃣Req.dan kelgan email orqali user ma'lumotlari get qilinadi.
+// 3️⃣Topilsa code solishtiriladi.
+// 4️⃣barchasi success bo'lsa redisdagi ma'lumot MongoDb ga saqlanadi.

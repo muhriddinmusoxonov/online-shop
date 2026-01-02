@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../user/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { redis } from 'src/common/providers/redis.provider';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,8 +52,14 @@ export class AuthService {
     code: string,
   ): Promise<string> {
     await redis.set(`reset:${token}`, JSON.stringify({ code, userId }), {
-      EX: 60,
+      EX: 63,
     });
+
+    return 'success';
+  }
+
+  async saveRegisterResetCode(registerData: RegisterDto, token: string, code: string): Promise<string> {
+    await redis.set(`reset:${token}`, JSON.stringify({ registerData, code }), { EX: 63 });
 
     return 'success';
   }
