@@ -1,3 +1,6 @@
+import CheckGmailCode from '@/components/CheckGmailCode.vue'
+import ForgotPasswordPage from '@/components/ForgotPasswordPage.vue'
+import ResetCode from '@/components/ResetCode.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
@@ -20,6 +23,21 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgotPassword',
+      component: ForgotPasswordPage
+    },
+    {
+      path: '/check-code',
+      name: 'checkCode',
+      component: CheckGmailCode
+    },
+    {
+      path: '/reset-code',
+      name: 'resetCode',
+      component: ResetCode
     }
   ],
 })
