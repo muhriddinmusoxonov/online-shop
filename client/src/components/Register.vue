@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import Button from '@/ui-components/Button.vue';
+
+</script>
+
 <template>
   <div class="flex min-h-full flex-1 flex-col justify-center px-6 py-20 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -39,9 +44,7 @@
         </div>
 
         <div class="ml-10">
-          <div class="w-80">
-          <button type="submit" class="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">Sign in</button>
-        </div>
+          <Button>Register</Button>
         <p class="mt-10 text-center text-sm/6 text-gray-400">
           Not a member?
           {{ ' ' }}
