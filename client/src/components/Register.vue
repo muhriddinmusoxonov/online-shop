@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from '@/ui-components/Button.vue';
+import Input from '@/ui-components/Input.vue';
 
 </script>
 
@@ -13,43 +14,23 @@ import Button from '@/ui-components/Button.vue';
 
     <div class="mt-10 flex justify-center items-center sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" action="#" method="POST">
-        <div>
-          <div class="mt-2 flex justify-center items-center">
-            <i class="fa-solid fa-user inline text-orange-600 text-2xl mx-2"></i>
-            <input type="text" name="fullName" id="fullName" autocomplete="fullName" required class="w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-orange-600 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Full Name..." />
-          </div>
-        </div>
 
-        <div>
-          <div class="mt-2 flex justify-center items-center">
-            <i class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2"></i>
-            <input type="email" name="email" id="email" autocomplete="email" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-orange-600 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Gmail Address..."/>
-          </div>
-        </div>
+        <Input i-class="fa-solid fa-user inline text-orange-600 text-2xl mx-2" type="string" placeholder="Full Name..."/>
 
-        <div>
-          <div class="mt-2 flex justify-center items-center">
-            <i class="fa-solid fa-phone inline text-orange-600 text-2xl mx-2"></i>
-            <input type="phoneNumber" name="phoneNumber" id="phoneNumber" autocomplete="phoneNumber" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-orange-600 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Phone Number..."/>
-          </div>
-        </div>
+        <Input i-class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2" type="string" placeholder="Gmail Address..." />
 
-        <div>
-          <div class="flex items-center justify-between">
-          </div>
-          <div class="mt-2 flex justify-center items-center">
-            <i class="fa-solid fa-key inline text-orange-600 text-2xl mx-2"></i>
-            <input type="password" name="password" id="password" autocomplete="current-password" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-orange-600 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Password..." />
-          </div>
-        </div>
+        <Input i-class="fa-solid fa-phone inline text-orange-600 text-2xl mx-2" type="string" placeholder="Phone Number..." />
+
+        <Input i-class="fa-solid fa-key inline text-orange-600 text-2xl mx-2" type="string" placeholder="Password..." />
+
 
         <div class="ml-10">
           <Button>Register</Button>
-        <p class="mt-10 text-center text-sm/6 text-gray-400">
-          Not a member?
-          {{ ' ' }}
-          <a href="#" class="font-semibold text-orange-600 hover:text-indigo-300">Start a 14 day free trial</a>
-        </p>
+          <p class="mt-10 text-center text-sm/6 text-gray-400">
+            Not a member?
+            {{ ' ' }}
+            <a href="#" class="font-semibold text-orange-600 hover:text-indigo-300">Start a 14 day free trial</a>
+          </p>
         </div>
       </form>
 
