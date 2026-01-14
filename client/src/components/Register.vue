@@ -1,6 +1,28 @@
-<script setup lang="ts">
+<script>
 import Button from '@/ui-components/Button.vue';
 import Input from '@/ui-components/Input.vue';
+
+export default {
+  computed: {
+    isLoading() {
+      return this.$store.state.auth.isLoading
+    }
+  },
+  methods: {
+    submitHandler(e) {
+      e.preventDefault()
+      const user = {
+        full_name: "Muhriddin Musoxonov",
+        email: "muhriddinmusoxonov@gmail.com",
+        password: "mypassword",
+        phone: 998976828683
+      }
+      this.$store.dispatch('register', {...user}).then(data => {console.log("Data", data)
+      }).catch(error => {console.log("ERROR", error)
+      }) //user -> payload deb ataladi.
+    }
+  }
+}
 
 </script>
 
@@ -25,7 +47,7 @@ import Input from '@/ui-components/Input.vue';
 
 
         <div class="ml-10">
-          <Button>Register</Button>
+          <Button type="submit" @click="submitHandler" :disabled="isLoading">Register</Button>
           <p class="mt-10 text-center text-sm/6 text-gray-400">
             Not a member?
             {{ ' ' }}
