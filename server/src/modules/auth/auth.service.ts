@@ -58,8 +58,14 @@ export class AuthService {
     return 'success';
   }
 
-  async saveRegisterResetCode(registerData: RegisterDto, token: string, code: string): Promise<string> {
-    await redis.set(`reset:${token}`, JSON.stringify({ registerData, code }), { EX: 63 });
+  async saveRegisterResetCode(
+    registerData: RegisterDto,
+    token: string,
+    code: string,
+  ): Promise<string> {
+    await redis.set(`reset:${token}`, JSON.stringify({ registerData, code }), {
+      EX: 63,
+    });
 
     return 'success';
   }

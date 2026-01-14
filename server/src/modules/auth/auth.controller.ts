@@ -37,12 +37,12 @@ export class AuthController {
     private readonly mailService: MailService,
   ) {}
 
-  @Post('register-send-code')
+  @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.userService.findByEmail(registerDto.email);
     if (user !== null) throw new UserIsAlreadyExist();
 
-    const userByPhone = this.userService.findByPhone(registerDto.phone);
+    const userByPhone = await this.userService.findByPhone(registerDto.phone);
     if (userByPhone !== null) throw new UserIsAlreadyExist();
 
     const password = await this.authService.hashPassword(registerDto.password);
@@ -51,13 +51,13 @@ export class AuthController {
 
     const code = await generateCode();
 
-    const token = await this.authService.generateResetCodeToken(registerDto.email);
-
+    const token = await this.authService.generateResetCodeToken(
+      registerDto.email,
+    );
 
     await this.authService.saveRegisterResetCode(registerDto, token, code);
 
-
-      await this.mailService.sendMail({
+    await this.mailService.sendMail({
       to: registerDto.email,
       subject: 'Password Reset Code',
       text: `Your reset password code: ${code}`,
@@ -69,13 +69,12 @@ export class AuthController {
   @Post('register-check-code')
   @UseGuards(RegisterVerifyGuard)
   async checkRegisterCode(@Body() code: CheckCodeDto, @Req() req) {
-    const email = req['userEmail'];
+    // const email = req['userEmail'];
     const token = req['registerToken'];
 
     const userData = await this.authService.getResetCode(token);
 
     if (userData.code !== String(code.code)) throw new CodeIsWrong();
-
 
     const newUser = await this.userService.create(userData.registerData);
 
@@ -167,19 +166,3 @@ export class AuthController {
     return new ResData<User>(200, 'success', newUser);
   }
 }
-
-
-// manda yana bitta fikr tug'uldi.
-
-// Registerga sendEmailCode jo'natish uchun umumiy register ni bo'lib yuboramiz bir nechta qismga.
-// Birinchi qismda 'register-email-code'
-// 1️⃣dto dan kelgan emailga code jo'natadi
-// 2️⃣barcha register ma'lumotlarini redisga saqlanadi
-// get va set register uchun alohida yoziladi.
-// 3️⃣token yasaladi email orqli va u ham saqlanadi Redisga.
-
-// Ikkinchi qismda:
-// 1️⃣Guard yoziladi alohida.
-// 2️⃣Req.dan kelgan email orqali user ma'lumotlari get qilinadi.
-// 3️⃣Topilsa code solishtiriladi.
-// 4️⃣barchasi success bo'lsa redisdagi ma'lumot MongoDb ga saqlanadi.
