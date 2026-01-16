@@ -3,6 +3,16 @@ import Button from '@/ui-components/Button.vue';
 import Input from '@/ui-components/Input.vue';
 
 export default {
+
+  data() {
+    return {
+      full_name: '',
+      email: '',
+      password: '',
+      phone: ''
+    }
+  },
+
   computed: {
     isLoading() {
       return this.$store.state.auth.isLoading
@@ -12,12 +22,12 @@ export default {
     submitHandler(e) {
       e.preventDefault()
       const user = {
-        full_name: "Muhriddin Musoxonov",
-        email: "muhriddinmusoxonov@gmail.com",
-        password: "mypassword",
-        phone: 998976828683
+        full_name: this.full_name,
+        email: this.email,
+        password: this.password,
+        phone: Number(this.phone)
       }
-      this.$store.dispatch('register', {...user}).then(data => {console.log("Data", data)
+      this.$store.dispatch('register', {...user}).then(data => {console.log("Data", data), this.$router.push({name: 'checkCode'})
       }).catch(error => {console.log("ERROR", error)
       }) //user -> payload deb ataladi.
     }
@@ -37,13 +47,13 @@ export default {
     <div class="mt-10 flex justify-center items-center sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" action="#" method="POST">
 
-        <Input i-class="fa-solid fa-user inline text-orange-600 text-2xl mx-2" type="string" placeholder="Full Name..."/>
+        <Input i-class="fa-solid fa-user inline text-orange-600 text-2xl mx-2" id="fullName" type="string" v-model="full_name" placeholder="Full Name..."/>
 
-        <Input i-class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2" type="string" placeholder="Gmail Address..." />
+        <Input i-class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2" id="email" type="string" v-model="email" placeholder="Gmail Address..." />
 
-        <Input i-class="fa-solid fa-phone inline text-orange-600 text-2xl mx-2" type="string" placeholder="Phone Number..." />
+        <Input i-class="fa-solid fa-phone inline text-orange-600 text-2xl mx-2" id="phoneNumber" type="string" v-model="phone" placeholder="Phone Number..." />
 
-        <Input i-class="fa-solid fa-key inline text-orange-600 text-2xl mx-2" type="string" placeholder="Password..." />
+        <Input i-class="fa-solid fa-key inline text-orange-600 text-2xl mx-2" id="password" type="string" v-model="password" placeholder="Password..." />
 
 
         <div class="ml-10">
