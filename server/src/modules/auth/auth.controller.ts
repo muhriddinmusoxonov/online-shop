@@ -55,6 +55,9 @@ export class AuthController {
       registerDto.email,
     );
 
+    console.log(token);
+
+
     await this.authService.saveRegisterResetCode(registerDto, token, code);
 
     await this.mailService.sendMail({
