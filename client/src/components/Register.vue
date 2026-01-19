@@ -1,6 +1,7 @@
 <script>
 import Button from '@/ui-components/Button.vue';
 import Input from '@/ui-components/Input.vue';
+import ValidationErrors from './ValidationErrors.vue';
 
 export default {
 
@@ -16,8 +17,17 @@ export default {
   computed: {
     isLoading() {
       return this.$store.state.auth.isLoading
+    },
+
+    validationErrors() {
+      return this.$store.state.auth.error
     }
   },
+
+  components: {
+    ValidationErrors
+  },
+
   methods: {
     submitHandler(e) {
       e.preventDefault()
@@ -46,7 +56,7 @@ export default {
 
     <div class="mt-10 flex justify-center items-center sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" action="#" method="POST">
-
+        <ValidationErrors :validationErrors="validationErrors" />
         <Input i-class="fa-solid fa-user inline text-orange-600 text-2xl mx-2" id="fullName" type="string" v-model="full_name" placeholder="Full Name..."/>
 
         <Input i-class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2" id="email" type="string" v-model="email" placeholder="Gmail Address..." />
