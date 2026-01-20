@@ -19,7 +19,8 @@ const mutations = {
   },
   registerFailure(state, payload) {
     state.isLoading = false
-    state.error = payload.response.data
+    state.error = payload
+
   }
 }
 
@@ -28,12 +29,14 @@ const actions = {
     return new Promise((resolve,reject) => {
       context.commit('registerStart')
       AuthService.register(user).then(response => {
-        context.commit('registerSuccess', response.data)
-        resolve(response.data.meta)
+        context.commit('registerSuccess', response.data.user)
         setItem('token', response.data.meta.token)
+        resolve(response.data.user)
       })
         .catch(error => {
-          context.commit('registerFailure', error)
+          const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
+
+          context.commit('registerFailure', msg)
           reject(error.response.data)
       })
     })
@@ -45,7 +48,6 @@ const actions = {
       AuthService.checkCode(code).then(response => {
         context.commit('registerSuccess', response.data)
         resolve(response.data.meta)
-        // setItem('token', response.data.meta.token)
       })
         .catch(error => {
           context.commit('registerFailure', error)

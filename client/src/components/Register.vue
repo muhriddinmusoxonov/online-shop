@@ -56,7 +56,7 @@ export default {
 
     <div class="mt-10 flex justify-center items-center sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" action="#" method="POST">
-        <ValidationErrors :validationErrors="validationErrors" />
+        <ValidationErrors v-if="validationErrors" :validationErrors="validationErrors" />
         <Input i-class="fa-solid fa-user inline text-orange-600 text-2xl mx-2" id="fullName" type="string" v-model="full_name" placeholder="Full Name..."/>
 
         <Input i-class="fa-solid fa-envelope inline text-orange-600 text-2xl mx-2" id="email" type="string" v-model="email" placeholder="Gmail Address..." />
@@ -75,7 +75,6 @@ export default {
           </p>
         </div>
       </form>
-
     </div>
   </div>
 </template>
