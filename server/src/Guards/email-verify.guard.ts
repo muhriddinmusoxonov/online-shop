@@ -16,17 +16,11 @@ export class RegisterVerifyGuard implements CanActivate {
     const authHeader = request.headers.authorization;
     const token = authHeader.split(' ')[1];
 
-
     if (!token) {
       throw new UnauthorizedException('Reset token required');
     }
 
-    console.log(token, typeof token);
-
-
     const user = await redis.get(`reset:${token}`);
-    console.log(user);
-
 
     if (!user) {
       throw new UnauthorizedException('Invalid or expired reset token');

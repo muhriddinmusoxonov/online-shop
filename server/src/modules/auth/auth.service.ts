@@ -40,7 +40,7 @@ export class AuthService {
       { _id: id },
       {
         secret: process.env.FORGOTP_SECRET,
-        expiresIn: '600',
+        expiresIn: '60',
       },
     );
     return token;
@@ -70,8 +70,25 @@ export class AuthService {
     return 'success';
   }
 
+  async saveRegisterResedCode(
+    registerData: RegisterDto,
+    email: string,
+    code: string,
+  ): Promise<string> {
+    await redis.set(`reset:${email}`, JSON.stringify({ registerData, code }), {
+      EX: 300,
+    });
+
+    return 'success';
+  }
+
   async getResetCode(token: string) {
     const data = await redis.get(`reset:${token}`);
+    return data ? JSON.parse(data.toString()) : null;
+  }
+
+  async getResetCodeByEmail(email: string) {
+    const data = await redis.get(`reset:${email}`);
     return data ? JSON.parse(data.toString()) : null;
   }
 }

@@ -26,7 +26,7 @@ export class RegisterDto extends CreateUserDto {
 
   @IsInt()
   @IsNotEmpty()
-  @Min(100000000000)
-  @Max(999999999999)
+  @Min(100000000000, { message: 'Phone number must contain 12 digits' })
+  @Max(999999999999, { message: 'Phone number must contain 12 digits' })
   phone: number;
 }

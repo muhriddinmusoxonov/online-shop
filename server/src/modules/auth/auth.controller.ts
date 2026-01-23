@@ -55,10 +55,13 @@ export class AuthController {
       registerDto.email,
     );
 
-    console.log(token);
-
-
     await this.authService.saveRegisterResetCode(registerDto, token, code);
+
+    await this.authService.saveRegisterResedCode(
+      registerDto,
+      registerDto.email,
+      code,
+    );
 
     await this.mailService.sendMail({
       to: registerDto.email,
@@ -72,7 +75,6 @@ export class AuthController {
   @Post('register-check-code')
   @UseGuards(RegisterVerifyGuard)
   async checkRegisterCode(@Body() code: CheckCodeDto, @Req() req) {
-    // const email = req['userEmail'];
     const token = req['registerToken'];
 
     const userData = await this.authService.getResetCode(token);
@@ -82,6 +84,37 @@ export class AuthController {
     const newUser = await this.userService.create(userData.registerData);
 
     return new ResData<User>(201, 'created', newUser);
+  }
+
+  @Post('resend-code')
+  async resendCode(@Body() email: SendCodeDto) {
+    const code = await generateCode();
+
+    const user = await this.authService.getResetCodeByEmail(email.email);
+
+    user.code = code;
+
+    const token = await this.authService.generateResetCodeToken(email.email);
+
+    await this.authService.saveRegisterResetCode(
+      {
+        email: email.email,
+        full_name: user.registerData.full_name,
+        password: user.registerData.password,
+        phone: user.registerData.phone,
+        role: user.registerData.role,
+      },
+      token,
+      code,
+    );
+
+    await this.mailService.sendMail({
+      to: email.email,
+      subject: 'Password Reset Code',
+      text: `Your reset password code: ${code}`,
+    });
+
+    return new ResData<null>(200, 'success', null, { token });
   }
 
   @Post('login')
