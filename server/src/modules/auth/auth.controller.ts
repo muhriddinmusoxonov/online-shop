@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Req,
-  Headers,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { UserService } from '../user/user.service';
@@ -83,7 +76,9 @@ export class AuthController {
 
     const newUser = await this.userService.create(userData.registerData);
 
-    return new ResData<User>(201, 'created', newUser);
+    const registerToken = await this.authService.generateToken(newUser);
+
+    return new ResData<User>(201, 'created', newUser, { token: registerToken });
   }
 
   @Post('resend-code')
@@ -144,10 +139,22 @@ export class AuthController {
     const code = await generateCode();
 
     const token = await this.authService.generateResetCodeToken(
-      String(user._id),
+      sendCodeDto.email,
     );
 
-    await this.authService.saveResetCode(String(user._id), token, code);
+    await this.authService.saveResetCode(sendCodeDto.email, token, code);
+
+    await this.authService.saveRegisterResedCode(
+      {
+        full_name: user.full_name,
+        email: sendCodeDto.email,
+        password: user.password,
+        phone: user.phone,
+        role: user.role,
+      },
+      sendCodeDto.email,
+      code,
+    );
 
     await this.mailService.sendMail({
       to: user.email,
@@ -161,14 +168,11 @@ export class AuthController {
   //'check-code'
   @Post('check-code')
   @UseGuards(ResetCodeGuard)
-  async checkCode(
-    @Body() checkCode: CheckCodeDto,
-    @Req() req,
-    @Headers('reset-token') token: string,
-  ) {
-    const id = req['userId'];
+  async checkCode(@Body() checkCode: CheckCodeDto, @Req() req) {
+    // const id = req['userId'];
+    const token = req['token'];
 
-    const user = await this.userService.findOneById(id);
+    const user = await this.userService.findByEmail(checkCode.email);
     if (user === null) throw new UserIsNotFound();
 
     const userRedis = await redis.get(`reset:${token}`);
@@ -176,10 +180,16 @@ export class AuthController {
 
     if (Number(code) !== checkCode.code) throw new CodeIsWrong();
 
-    const resetToken = await this.authService.generateResetCodeToken(id);
+    const resetToken = await this.authService.generateResetCodeToken(
+      checkCode.email,
+    );
 
     const codeRedis = '1234';
-    await this.authService.saveResetCode(id, resetToken, codeRedis);
+    await this.authService.saveResetCode(
+      checkCode.email,
+      resetToken,
+      codeRedis,
+    );
 
     return new ResData<null>(200, 'success', null, { token: resetToken });
   }
@@ -187,15 +197,15 @@ export class AuthController {
   // 'reset-password'
   @Post('reset-code')
   @UseGuards(ResetCodeGuard)
-  async resetCode(@Body() resetCode: ResetCode, @Req() req) {
-    const id = req['userId'];
+  async resetCode(@Body() resetCode: ResetCode) {
+    // const id = req['userId'];
 
-    const user = await this.userService.findOneById(id);
+    const user = await this.userService.findByEmail(resetCode.email);
     if (user === null) throw new UserIsNotFound();
 
     const hashPassword = await this.authService.hashPassword(resetCode.code);
 
-    const newUser = await this.userService.update(id, {
+    const newUser = await this.userService.updateByEmail(resetCode.email, {
       password: hashPassword,
     });
 

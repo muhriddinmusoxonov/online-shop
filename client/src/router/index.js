@@ -30,7 +30,7 @@ const router = createRouter({
       component: ForgotPasswordPage
     },
     {
-      path: '/check-code',
+      path: '/check-code/:type',
       name: 'checkCode',
       component: CheckGmailCode
     },

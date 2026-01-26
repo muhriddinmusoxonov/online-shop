@@ -13,11 +13,10 @@ export class ResetCodeGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const authHeader = request.headers['authorization'] as string;
-    const token =
-      authHeader && authHeader.startsWith('Bearer ')
-        ? authHeader.split(' ')[1]
-        : null;
+    const authHeader = request.headers.authorization;
+    if (authHeader === undefined)
+      throw new UnauthorizedException('Reset token required');
+    const token = authHeader.split(' ')[1];
 
     if (!token) {
       throw new UnauthorizedException('Reset token required');
@@ -29,9 +28,7 @@ export class ResetCodeGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired reset token');
     }
 
-    const userId = JSON.parse(user.toString());
-
-    request['userId'] = userId.userId;
+    request['token'] = token;
 
     return true;
   }

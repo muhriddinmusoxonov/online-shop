@@ -37,7 +37,7 @@ export default {
         password: this.password,
         phone: Number(this.phone)
       }
-      this.$store.dispatch('register', {...user}).then(data => {console.log("Data", data), this.$router.push({name: 'checkCode'})
+      this.$store.dispatch('register', {...user}).then(data => {console.log("Data", data), this.$router.push('/check-code/register')
       }).catch(error => {console.log("ERROR", error)
       }) //user -> payload deb ataladi.
     }

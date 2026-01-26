@@ -15,6 +15,14 @@ const AuthService = {
 
   resendCode(email) {
     return api.post('/auth/resend-code', email)
+  },
+
+  forgotPassword(email) {
+    return api.post('/auth/forgot-password', email)
+  },
+
+  checkForgotCode(code) {
+  return api.post('/auth/check-code', code)
   }
 }
 

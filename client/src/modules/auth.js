@@ -55,6 +55,22 @@ const mutations = {
       state.error = payload
   },
 
+  checkCodeStart(state) {
+    state.isLoading = true,
+      state.user = null,
+      state.error = null
+  },
+
+  checkCodeSuccess(state, payload) {
+    state.isLoading = false,
+      state.user = payload
+  },
+
+  checkCodeFailure(state, payload) {
+    state.isLoading = false,
+      state.error = payload
+  },
+
   resendCodeStart(state) {
     state.isLoading = true,
       state.user = null,
@@ -67,6 +83,22 @@ const mutations = {
   },
 
   resendCodeFailure(state, payload) {
+    state.isLoading = false,
+      state.error = payload
+  },
+
+  forgotPasswordStart(state) {
+    state.isLoading = true,
+      state.user = null,
+      state.error = null
+  },
+
+  forgotPasswordSuccess(state, payload) {
+    state.isLoading = false,
+      state.user = payload
+  },
+
+  forgotPasswordFailure(state, payload) {
     state.isLoading = false,
       state.error = payload
   },
@@ -137,13 +169,50 @@ const actions = {
         .catch(error => {
           const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
 
-          context.commit('registerFailure', msg)
+          context.commit('loginFailure', msg)
           reject(error.response.data)
         })
     })
   },
 
+  forgotPassword(context, email) {
+    return new Promise((resolve, reject) => {
+      context.commit('forgotPasswordStart')
+      localStorage.removeItem('token')
+      localStorage.removeItem('email')
+      AuthService.forgotPassword(email).then(response => {
+        context.commit('forgotPasswordSuccess', response.data.user)
+        setItem('email', email.email)
+        setItem('token', response.data.meta.token)
+        resolve(response.data.user)
+      })
+        .catch(error => {
+          const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
 
+          context.commit('forgotPasswordFailure', msg)
+          reject(error.response.data)
+        })
+    })
+  },
+
+  checkCode(context, code) {
+    return new Promise((resolve, reject) => {
+      context.commit('checkCodeStart')
+      AuthService.checkForgotCode(code).then(response => {
+        context.commit('checkCodeSuccess', response.data.user)
+        localStorage.removeItem('token')
+        // setItem('email', code.email)
+        setItem('token', response.data.meta.token)
+        resolve(response.data.user)
+      })
+        .catch(error => {
+          const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
+
+          context.commit('checkCodeFailure', msg)
+          reject(error.response.data)
+        })
+    })
+  },
 }
 
 export default {

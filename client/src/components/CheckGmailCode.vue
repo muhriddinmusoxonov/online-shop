@@ -2,6 +2,7 @@
 import Button from '@/ui-components/Button.vue';
 import Input from '@/ui-components/Input.vue';
 import ValidationErrors from './ValidationErrors.vue';
+import { getItem } from '@/helpers/persistaneStorage';
 
 export default {
   data() {
@@ -30,18 +31,31 @@ export default {
     },
     validationErrors() {
       return this.$store.state.auth.error
+    },
+    type() {
+      return this.$route.params.type;
     }
   },
 
   methods: {
     submitHandler(e) {
       e.preventDefault()
+      const email = localStorage.getItem('email');
       const code = {
         code: Number(this.code),
+        email: email
       }
-      this.$store.dispatch('checkRegisterCode', {...code}).then(data => {console.log("Data", data), this.$router.push({name: 'login'})
+      if (this.type === 'register') {
+        this.$store.dispatch('checkRegisterCode', {...code}).then(data => {console.log("Data", data), this.$router.push({name: 'login'})
       }).catch(error => {console.log("ERROR", error)
       }) //user -> payload deb ataladi.
+      }
+
+      if (this.type === 'forgot-password') {
+        this.$store.dispatch('checkCode', {...code}).then(data => {console.log("Data", data), this.$router.push({name: 'resetCode'})
+      }).catch(error => {console.log("ERROR", error)
+      }) //user -> payload deb ataladi.
+      }
     },
 
 
@@ -109,11 +123,3 @@ export default {
     </div>
   </div>
 </template>
-
-
-<!--
-1. Timer qo'yiladi 60 dan boshlab kamayish tartibida ishlaydi.
-2. Timer 0 bo'lgach button disabled bo'ladi.
-3. Code ni qayta jo'natish uchun button qo'yiladi va unga code ni qayta jo'natuvchi funcktion biriktiriladi.
-4. Code ni qayta jo'natish funksiyasi ishlagandan so'ng sekundnamer reset bo'ladi.
--->

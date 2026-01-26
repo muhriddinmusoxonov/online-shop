@@ -4,6 +4,7 @@ import { User } from '../user/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { redis } from 'src/common/providers/redis.provider';
 import { RegisterDto } from './dto/register.dto';
+import { SendCodeDto } from './dto/send.code.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +41,7 @@ export class AuthService {
       { _id: id },
       {
         secret: process.env.FORGOTP_SECRET,
-        expiresIn: '60',
+        expiresIn: '300',
       },
     );
     return token;
