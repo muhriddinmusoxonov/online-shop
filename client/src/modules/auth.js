@@ -102,6 +102,22 @@ const mutations = {
     state.isLoading = false,
       state.error = payload
   },
+
+  resetCodeStart(state) {
+    state.isLoading = true,
+      state.user = null,
+      state.error = null
+  },
+
+  resetCodeSuccess(state, payload) {
+    state.isLoading = false,
+      state.user = payload
+  },
+
+  resetCodeFailure(state, payload) {
+    state.isLoading = false,
+      state.error = payload
+  },
 }
 
 const actions = {
@@ -209,6 +225,24 @@ const actions = {
           const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
 
           context.commit('checkCodeFailure', msg)
+          reject(error.response.data)
+        })
+    })
+  },
+
+  resetCode(context, code) {
+    return new Promise((resolve, reject) => {
+      context.commit('resetCodeStart')
+      AuthService.resetCode(code).then(response => {
+        context.commit('resetCodeSuccess', response.data.user)
+        localStorage.removeItem('token')
+        localStorage.removeItem('email')
+        resolve(response.data.user)
+      })
+        .catch(error => {
+          const msg = Array.isArray(error.response?.data?.message) ? error.response?.data?.message : [error.response?.data?.message];
+
+          context.commit('resetCodeFailure', msg)
           reject(error.response.data)
         })
     })

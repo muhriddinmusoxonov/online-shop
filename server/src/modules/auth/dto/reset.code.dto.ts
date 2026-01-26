@@ -1,20 +1,26 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { Match } from './match.decorator';
 
 export class ResetCode {
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  code: string;
+  newPassword: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  @Match('code', { message: 'confirmPassword must match code' })
+  @Match('newPassword', { message: 'confirmPassword must match newPassword' })
   confirmPassword: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
   email: string;
 }

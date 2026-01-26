@@ -198,12 +198,12 @@ export class AuthController {
   @Post('reset-code')
   @UseGuards(ResetCodeGuard)
   async resetCode(@Body() resetCode: ResetCode) {
-    // const id = req['userId'];
-
     const user = await this.userService.findByEmail(resetCode.email);
     if (user === null) throw new UserIsNotFound();
 
-    const hashPassword = await this.authService.hashPassword(resetCode.code);
+    const hashPassword = await this.authService.hashPassword(
+      resetCode.newPassword,
+    );
 
     const newUser = await this.userService.updateByEmail(resetCode.email, {
       password: hashPassword,
