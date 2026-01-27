@@ -4,7 +4,8 @@ import AuthService from "@/service/auth";
 const state = {
   isLoading: false,
   user: null,
-  error: null
+  error: null,
+  isLoggedIn: null
 }
 
 const mutations = {
@@ -12,74 +13,84 @@ const mutations = {
     state.isLoading = true;
     state.user = null
     state.error = null
+    state.isLoggedIn = null
   },
   registerSuccess(state, payload) {
     state.isLoading = false
-    state.user = payload
+    state.user = payload,
+    state.isLoggedIn = null
   },
   registerFailure(state, payload) {
     state.isLoading = false
     state.error = payload
-
+    state.isLoggedIn = false
   },
 
   loginStart(state) {
     state.isLoading = true,
     state.user = null,
     state.error = null
+    state.isLoggedIn = null
   },
 
   loginSuccess(state, payload) {
     state.isLoading = false,
     state.user = payload
+    state.isLoggedIn = true
   },
 
   loginFailure(state, payload) {
     state.isLoading = false,
     state.error = payload
+    state.isLoggedIn = false
   },
 
   checkRegisterCodeStart(state) {
     state.isLoading = true,
-      state.user = null,
-      state.error = null
+    state.user = null,
+    state.error = null
+    state.isLoggedIn = null
   },
 
   checkRegisterCodeSuccess(state, payload) {
     state.isLoading = false,
-      state.user = payload
+    state.user = payload
+    state.isLoggedIn = null
   },
 
   checkRegisterCodeFailure(state, payload) {
     state.isLoading = false,
-      state.error = payload
+    state.error = payload
+    state.isLoggedIn = false
   },
 
   checkCodeStart(state) {
     state.isLoading = true,
-      state.user = null,
-      state.error = null
+    state.user = null,
+    state.error = null
   },
 
   checkCodeSuccess(state, payload) {
     state.isLoading = false,
-      state.user = payload
+    state.user = payload
+    state.isLoggedIn = null
   },
 
   checkCodeFailure(state, payload) {
     state.isLoading = false,
-      state.error = payload
+    state.error = payload
+    state.isLoggedIn = false
   },
 
   resendCodeStart(state) {
     state.isLoading = true,
-      state.user = null,
-      state.error = null
+    state.user = null,
+    state.error = null
   },
 
   resendCodeSuccess(state, payload) {
     state.isLoading = false,
-      state.user = payload
+    state.user = payload
   },
 
   resendCodeFailure(state, payload) {
@@ -89,34 +100,40 @@ const mutations = {
 
   forgotPasswordStart(state) {
     state.isLoading = true,
-      state.user = null,
-      state.error = null
+    state.user = null,
+    state.error = null
+    state.isLoggedIn = null
   },
 
   forgotPasswordSuccess(state, payload) {
     state.isLoading = false,
-      state.user = payload
+    state.user = payload,
+    state.isLoggedIn = null
   },
 
   forgotPasswordFailure(state, payload) {
     state.isLoading = false,
-      state.error = payload
+    state.error = payload
+    state.isLoggedIn = false
   },
 
   resetCodeStart(state) {
     state.isLoading = true,
-      state.user = null,
-      state.error = null
+    state.user = null,
+    state.error = null
+    state.isLoggedIn = null
   },
 
   resetCodeSuccess(state, payload) {
     state.isLoading = false,
-      state.user = payload
+    state.user = payload
+    state.isLoggedIn = null
   },
 
   resetCodeFailure(state, payload) {
     state.isLoading = false,
-      state.error = payload
+    state.error = payload
+    state.isLoggedIn = false
   },
 }
 
@@ -125,7 +142,7 @@ const actions = {
     return new Promise((resolve,reject) => {
       context.commit('registerStart')
       AuthService.register(user).then(response => {
-        context.commit('registerSuccess', response.data.user)
+        context.commit('registerSuccess', response.data.data)
         setItem('token', response.data.meta.token)
         setItem('email', user.email)
         resolve(response.data.user)
@@ -144,7 +161,7 @@ const actions = {
       context.commit('resendCodeStart')
       localStorage.removeItem('token')
       AuthService.resendCode(email).then(response => {
-        context.commit('resendCodeSuccess', response.data.user)
+        context.commit('resendCodeSuccess', response.data.data)
         setItem('token', response.data.meta.token)
         resolve(response.data.user)
       })
@@ -161,7 +178,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       context.commit('checkRegisterCodeStart')
       AuthService.checkCode(code).then(response => {
-        context.commit('checkRegisterCodeSuccess', response.data)
+        context.commit('checkRegisterCodeSuccess', response.data.data)
         localStorage.removeItem('email')
         resolve(response.data.meta)
       })
@@ -178,7 +195,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       context.commit('loginStart')
       AuthService.login(user).then(response => {
-        context.commit('loginSuccess', response.data.user)
+        context.commit('loginSuccess', response.data.data)
         setItem('token', response.data.meta.token)
         resolve(response.data.user)
       })
@@ -197,7 +214,7 @@ const actions = {
       localStorage.removeItem('token')
       localStorage.removeItem('email')
       AuthService.forgotPassword(email).then(response => {
-        context.commit('forgotPasswordSuccess', response.data.user)
+        context.commit('forgotPasswordSuccess', response.data.data)
         setItem('email', email.email)
         setItem('token', response.data.meta.token)
         resolve(response.data.user)
@@ -215,7 +232,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       context.commit('checkCodeStart')
       AuthService.checkForgotCode(code).then(response => {
-        context.commit('checkCodeSuccess', response.data.user)
+        context.commit('checkCodeSuccess', response.data.data)
         localStorage.removeItem('token')
         // setItem('email', code.email)
         setItem('token', response.data.meta.token)
@@ -234,7 +251,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       context.commit('resetCodeStart')
       AuthService.resetCode(code).then(response => {
-        context.commit('resetCodeSuccess', response.data.user)
+        context.commit('resetCodeSuccess', response.data.data)
         localStorage.removeItem('token')
         localStorage.removeItem('email')
         resolve(response.data.user)

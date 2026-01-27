@@ -8,7 +8,7 @@
         v-for="(errorMessage, index) in validationErrors"
         :key="index"
       >
-        {{ errorMessage }}
+        {{ errorMessage}}
       </li>
     </ul>
   </div>
