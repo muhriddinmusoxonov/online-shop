@@ -6,7 +6,7 @@ const state = {
   isLoading: false,
   user: null,
   error: null,
-  isLoggedIn: false
+  isLoggedIn: null
 }
 
 const getters = {
@@ -148,6 +148,23 @@ const mutations = {
     state.error = payload
     state.isLoggedIn = false
   },
+
+  getUserStart(state) {
+    state.isLoading = true
+  },
+
+  getUserSuccess(state, payload) {
+    state.isLoading = false,
+    state.user = payload,
+    state.isLoggedIn = true
+  },
+
+  getUserFailure(state, payload) {
+    state.isLoading = false,
+    state.error = payload
+    state.user = null
+    state.isLoggedIn = false
+  },
 }
 
 const actions = {
@@ -277,6 +294,18 @@ const actions = {
         })
     })
   },
+
+  getUser(context) {
+    return new Promise((resolve) => {
+      context.commit('getUserStart')
+      AuthService.getUser().then(response => {
+        console.log(response.data.data);
+
+        context.commit('getUserSuccess', response.data.data)
+        resolve(response.data.user)
+      }).catch(() => context.commit('getUserFailure'))
+    })
+  }
 }
 
 export default {

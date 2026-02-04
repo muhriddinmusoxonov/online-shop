@@ -7,6 +7,7 @@ import {
   Delete,
   Put,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,7 +46,7 @@ export class UserController {
     return new ResData<User>(201, 'created', data);
   }
 
-  @Get()
+  @Get('all')
   @UseGuards(AuthGuard('jwt'), RolesGuard, JwtAuthGuard)
   @Roles('admin')
   async findAll() {
@@ -54,8 +55,11 @@ export class UserController {
     return new ResData<User[]>(200, 'success', data);
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseObjectIdPipe) id: string) {
+  @Get()
+  @UseGuards(AuthGuard('jwt'), JwtAuthGuard)
+  async findOne(@Req() req) {
+    const id = req.user.userId;
+
     const user = await this.userService.findOneById(id);
 
     if (user === null) throw new UserIsNotFound();

@@ -4,7 +4,6 @@ import { User } from '../user/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { redis } from 'src/common/providers/redis.provider';
 import { RegisterDto } from './dto/register.dto';
-import { SendCodeDto } from './dto/send.code.dto';
 
 @Injectable()
 export class AuthService {

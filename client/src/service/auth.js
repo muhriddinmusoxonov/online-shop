@@ -27,6 +27,10 @@ const AuthService = {
 
   resetCode(code) {
     return api.post('/auth/reset-code', code)
+  },
+
+  getUser() {
+    return api.get('/user')
   }
 }
 
