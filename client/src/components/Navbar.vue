@@ -3,7 +3,10 @@
     <nav class="bg-white px-15 py-4 flex justify-between items-center shadow-md">
       <p class="text-orange-500 font-extrabold"><router-link :to="{name: 'home'}">LOGO</router-link></p>
       <template v-if="isLoggedIn">
-        {{ currentUser.full_name }}
+        <div>
+          {{ currentUser.full_name }}
+          <a href="#" @click="logout" class="px-5 hover:text-orange-600 cursor-pointer">Logout</a>
+        </div>
       </template>
       <template v-if="isAnonymous">
         <ul class="flex justify-between">
@@ -25,6 +28,12 @@ export default {
       isLoggedIn: getterTypes.isLoggedIn,
       isAnonymous: getterTypes.isAnonymous
     })
+  },
+
+  methods: {
+    logout() {
+      this.$store.dispatch('logout')
+    }
   }
 }
 </script>

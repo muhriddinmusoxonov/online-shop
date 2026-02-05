@@ -165,6 +165,11 @@ const mutations = {
     state.user = null
     state.isLoggedIn = false
   },
+
+  logout(state) {
+    state.user = null
+    state.isLoggedIn = false
+  }
 }
 
 const actions = {
@@ -305,6 +310,11 @@ const actions = {
         resolve(response.data.user)
       }).catch(() => context.commit('getUserFailure'))
     })
+  },
+
+  logout(context) {
+    context.commit('logout')
+    localStorage.removeItem('token')
   }
 }
 
