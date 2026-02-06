@@ -8,7 +8,10 @@ export class Product extends Document {
   @Prop({ required: true, type: String, unique: false })
   name: string;
 
-  @Prop()
+  @Prop({ required: true, type: String, unique: true })
+  slug: string;
+
+  @Prop({ options: true, type: String })
   description: string;
 
   @Prop({ required: true, min: 0, type: Number })

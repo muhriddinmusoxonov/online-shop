@@ -22,7 +22,7 @@ const AuthService = {
   },
 
   checkForgotCode(code) {
-  return api.post('/auth/check-code', code)
+    return api.post('/auth/check-code', code)
   },
 
   resetCode(code) {

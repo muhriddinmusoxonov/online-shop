@@ -19,6 +19,8 @@ import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { UserService } from '../user/user.service';
 import { UserIsNotFound } from '../user/excpetionErrors/userExceptionErrors';
 import { CategoryIsNotFound } from '../category/categoryExceptionErrors/categoryExceptionError';
+import { generateSlug } from 'src/lib/sugify';
+import { generateCode } from 'src/lib/generateCode';
 
 @Controller('product')
 export class ProductController {
@@ -37,6 +39,15 @@ export class ProductController {
       createProductDto.category_id,
     );
     if (category === null) throw new CategoryIsNotFound();
+
+    let productSlug = await generateSlug(createProductDto.name);
+    const product = await this.productService.findBySlug(productSlug);
+    if (product !== null) {
+      const code = await generateCode();
+      productSlug += code;
+    }
+
+    createProductDto.slug = productSlug;
 
     const data = await this.productService.create(createProductDto);
 

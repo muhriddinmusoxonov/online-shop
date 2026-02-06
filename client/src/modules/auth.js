@@ -269,7 +269,6 @@ const actions = {
       AuthService.checkForgotCode(code).then(response => {
         context.commit('checkCodeSuccess', response.data.data)
         localStorage.removeItem('token')
-        // setItem('email', code.email)
         setItem('token', response.data.meta.token)
         resolve(response.data.user)
       })

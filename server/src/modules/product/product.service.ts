@@ -51,4 +51,10 @@ export class ProductService {
 
     return product;
   }
+
+  async findBySlug(slug: string): Promise<Product | null> {
+    const product = await this.productModel.findOne({ slug });
+
+    return product;
+  }
 }
