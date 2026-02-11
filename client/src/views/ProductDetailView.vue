@@ -1,6 +1,9 @@
 
 <script>
+import ProductDetail from '@/components/ProductDetail.vue';
+
 export default {
+  components:{ProductDetail},
   mounted() {
     this.$store.dispatch('getProductDetail', this.$route.params.slug)
   }
@@ -8,6 +11,6 @@ export default {
 </script>
 <template>
   <div>
-    <h1 class="text-center text-5xl">Product Detail</h1>
+    <ProductDetail />
   </div>
 </template>

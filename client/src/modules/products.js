@@ -58,7 +58,7 @@ const actions = {
       context.commit('getProductsDetailStart')
       ProductService.getProductDetail(slug).then(data => {
         context.commit('getProductsDetailSuccess', data.data.data)
-        console.log(data.data);
+        resolve(data.data.data)
       }).catch(message => context.commit('getProductsDetailFailure', message))
     })
   }
