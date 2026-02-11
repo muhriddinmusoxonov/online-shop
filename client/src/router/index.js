@@ -3,6 +3,7 @@ import ForgotPasswordPage from '@/components/ForgotPasswordPage.vue'
 import ResetCode from '@/components/ResetCode.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
+import ProductDetailView from '@/views/ProductDetailView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/reset-code',
       name: 'resetCode',
       component: ResetCode
+    },
+    {
+      path: '/product/:slug',
+      name: 'productDetail',
+      component: ProductDetailView
     }
   ],
 })

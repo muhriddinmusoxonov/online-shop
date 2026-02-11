@@ -137,10 +137,10 @@ const mutations = {
     state.isLoggedIn = null
   },
 
-  resetCodeSuccess(state, payload) {
+  resetCodeSuccess(state) {
     state.isLoading = false,
-    state.user = payload
-    state.isLoggedIn = null
+    state.user = null,
+    state.isLoggedIn = false
   },
 
   resetCodeFailure(state, payload) {

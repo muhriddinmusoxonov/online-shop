@@ -69,6 +69,14 @@ export class ProductController {
     return new ResData<Product>(200, 'success', data);
   }
 
+  @Get('slug/:slug')
+  async findOneBySlug(@Param('slug') slug: string) {
+    const data = await this.productService.findBySlug(slug);
+    if (data === null) throw new ProductIsNotFound();
+
+    return new ResData<Product>(200, 'success', data);
+  }
+
   @Put(':id')
   async update(
     @Param('id', new ParseObjectIdPipe()) id: string,

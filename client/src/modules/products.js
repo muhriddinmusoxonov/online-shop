@@ -3,12 +3,14 @@ import ProductService from "@/service/products"
 const state = {
   data: null,
   isLoading: false,
-  error: null
+  error: null,
+  productDetail: null
 }
 
 const mutations = {
   getProductsStart(state) {
     state.isLoading = true
+    state.productDetail = null
   },
 
   getProductsSuccess(state, payload) {
@@ -20,6 +22,21 @@ const mutations = {
     state.isLoading = false
     state.error = payload
     state.data = null
+  },
+
+  getProductsDetailStart(state) {
+    state.isLoading = true
+  },
+
+  getProductsDetailSuccess(state, payload) {
+    state.isLoading = false
+    state.productDetail = payload
+  },
+
+  getProductsDetailFailure(state, payload) {
+    state.isLoading = false
+    state.error = payload,
+    state.productDetail = null
   }
 }
 
@@ -33,6 +50,16 @@ const actions = {
       }
       ).catch(message => context.commit('getProductsFailure', message)
       )
+    })
+  },
+
+  getProductDetail(context, slug) {
+    return new Promise((resolve, reject) => {
+      context.commit('getProductsDetailStart')
+      ProductService.getProductDetail(slug).then(data => {
+        context.commit('getProductsDetailSuccess', data.data.data)
+        console.log(data.data);
+      }).catch(message => context.commit('getProductsDetailFailure', message))
     })
   }
 }
