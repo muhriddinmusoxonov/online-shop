@@ -1,6 +1,7 @@
 import CheckGmailCode from '@/components/CheckGmailCode.vue'
 import ForgotPasswordPage from '@/components/ForgotPasswordPage.vue'
 import ResetCode from '@/components/ResetCode.vue'
+import CreateProductView from '@/views/CreateProductView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ProductDetailView from '@/views/ProductDetailView.vue'
@@ -44,7 +45,12 @@ const router = createRouter({
       path: '/product/:slug',
       name: 'productDetail',
       component: ProductDetailView
-    }
+    },
+    {
+      path: '/product/create',
+      name: 'createProduct',
+      component: CreateProductView
+    },
   ],
 })
 

@@ -7,6 +7,7 @@ import {
   Delete,
   HttpException,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,6 +22,8 @@ import { UserIsNotFound } from '../user/excpetionErrors/userExceptionErrors';
 import { CategoryIsNotFound } from '../category/categoryExceptionErrors/categoryExceptionError';
 import { generateSlug } from 'src/lib/sugify';
 import { generateCode } from 'src/lib/generateCode';
+import { JwtAuthGuard } from 'src/Guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('product')
 export class ProductController {
@@ -31,6 +34,7 @@ export class ProductController {
   ) {}
 
   @Post('create')
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() createProductDto: CreateProductDto) {
     const user = await this.userService.findOneById(createProductDto.user_id);
     if (user === null) throw new UserIsNotFound();

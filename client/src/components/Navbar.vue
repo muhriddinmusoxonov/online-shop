@@ -3,9 +3,14 @@
     <nav class="bg-white px-15 py-4 flex justify-between items-center shadow-md">
       <p class="text-orange-500 font-extrabold"><router-link :to="{name: 'home'}">LOGO</router-link></p>
       <template v-if="isLoggedIn">
-        <div>
-          {{ currentUser.full_name }}
-          <a href="#" @click="logout" class="px-5 hover:text-orange-600 cursor-pointer">Logout</a>
+        <div class="flex justify-between">
+          <div class="px-1.5">
+            {{ currentUser.full_name }}
+          </div>
+          <ul>
+            <li class="px-2 hover:text-orange-600 cursor-pointer"><a><router-link :to="{name: 'createProduct'}">CreateProduct</router-link></a></li>
+          </ul>
+          <a href="#" @click="logout" class="px-5 cursor-pointer"><i class="fa-solid fa-arrow-right-from-bracket" style="color: rgb(255, 0, 0);"></i></a>
         </div>
       </template>
       <template v-if="isAnonymous">
